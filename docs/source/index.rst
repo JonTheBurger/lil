@@ -1,17 +1,22 @@
-.. @PROJECT_NAME@ documentation master file, created by
-   sphinx-quickstart on Sun Jul  5 14:35:43 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. breathe-apidoc -o source xml
 
 Welcome to @PROJECT_NAME@'s documentation!
 ==========================================
 
+Doxygen
+-------
+
 .. toctree::
-   api/library_root
+   :maxdepth: 1
+   :caption: C++ API
+
+   namespacelist.rst
+   filelist.rst
+   structlist.rst
+   classlist.rst
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

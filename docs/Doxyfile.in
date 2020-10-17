@@ -8,8 +8,10 @@ INPUT                  = @PROJECT_SOURCE_DIR@/src @PROJECT_SOURCE_DIR@/include
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_LOGO           =
-OUTPUT_DIRECTORY       =
+# !Modified!
+PROJECT_LOGO           = @CPACK_PACKAGE_ICON@
+# !Modified!
+OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/docs
 CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
@@ -30,12 +32,17 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        =
-STRIP_FROM_INC_PATH    =
+# !Modified!
+STRIP_FROM_PATH        = @PROJECT_SOURCE_DIR@
+# !Modified!
+STRIP_FROM_INC_PATH    = @PROJECT_SOURCE_DIR@
 SHORT_NAMES            = NO
-JAVADOC_AUTOBRIEF      = NO
-JAVADOC_BANNER         = NO
-QT_AUTOBRIEF           = NO
+# !Modified!
+JAVADOC_AUTOBRIEF      = YES
+# !Modified!
+JAVADOC_BANNER         = YES
+# !Modified!
+QT_AUTOBRIEF           = YES
 MULTILINE_CPP_IS_BRIEF = NO
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
@@ -67,7 +74,8 @@ LOOKUP_CACHE_SIZE      = 0
 #---------------------------------------------------------------------------
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = NO
-EXTRACT_PRIV_VIRTUAL   = NO
+# !Modified!
+EXTRACT_PRIV_VIRTUAL   = YES
 EXTRACT_PACKAGE        = NO
 EXTRACT_STATIC         = NO
 EXTRACT_LOCAL_CLASSES  = YES
@@ -112,7 +120,7 @@ WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
-WARN_FORMAT            = "$file:$line: $text"
+WARN_FORMAT            = @DOXYGEN_WARN_FORMAT@
 WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -165,7 +173,8 @@ FILE_PATTERNS          = *.c \
                          *.ucf \
                          *.qsf \
                          *.ice
-RECURSIVE              = NO
+# !Modified!
+RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
@@ -193,7 +202,8 @@ USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 CLANG_ASSISTED_PARSING = NO
 CLANG_OPTIONS          =
-CLANG_DATABASE_PATH    =
+# !Modified!
+CLANG_DATABASE_PATH    = @PROJECT_BINARY_DIR@
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
@@ -220,9 +230,9 @@ HTML_DYNAMIC_SECTIONS  = NO
 HTML_INDEX_NUM_ENTRIES = 100
 GENERATE_DOCSET        = NO
 DOCSET_FEEDNAME        = "Doxygen generated docs"
-DOCSET_BUNDLE_ID       = org.doxygen.Project
-DOCSET_PUBLISHER_ID    = org.doxygen.Publisher
-DOCSET_PUBLISHER_NAME  = Publisher
+DOCSET_BUNDLE_ID       = org.@CPACK_PACKAGE_VENDOR@.@PROJECT_NAME@
+DOCSET_PUBLISHER_ID    = org.@CPACK_PACKAGE_VENDOR@
+DOCSET_PUBLISHER_NAME  = @CPACK_PACKAGE_VENDOR@
 GENERATE_HTMLHELP      = NO
 CHM_FILE               =
 HHC_LOCATION           =
@@ -232,17 +242,18 @@ BINARY_TOC             = NO
 TOC_EXPAND             = NO
 GENERATE_QHP           = NO
 QCH_FILE               =
-QHP_NAMESPACE          = org.doxygen.Project
+QHP_NAMESPACE          = org.@CPACK_PACKAGE_VENDOR@.@PROJECT_NAME@
 QHP_VIRTUAL_FOLDER     = doc
 QHP_CUST_FILTER_NAME   =
 QHP_CUST_FILTER_ATTRS  =
 QHP_SECT_FILTER_ATTRS  =
 QHG_LOCATION           =
 GENERATE_ECLIPSEHELP   = NO
-ECLIPSE_DOC_ID         = org.doxygen.Project
+ECLIPSE_DOC_ID         = org.@CPACK_PACKAGE_VENDOR@.@PROJECT_NAME@
 DISABLE_INDEX          = NO
 GENERATE_TREEVIEW      = NO
-ENUM_VALUES_PER_LINE   = 4
+# !Modified!
+ENUM_VALUES_PER_LINE   = 1
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO
 FORMULA_FONTSIZE       = 10
@@ -263,7 +274,8 @@ EXTRA_SEARCH_MAPPINGS  =
 #---------------------------------------------------------------------------
 # Configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
-GENERATE_LATEX         = YES
+# !Modified!
+GENERATE_LATEX         = NO
 LATEX_OUTPUT           = latex
 LATEX_CMD_NAME         =
 MAKEINDEX_CMD_NAME     = makeindex
@@ -304,7 +316,7 @@ MAN_LINKS              = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the XML output
 #---------------------------------------------------------------------------
-# MODIFIED
+# !Modified!
 GENERATE_XML           = YES
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES

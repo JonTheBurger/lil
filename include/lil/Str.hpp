@@ -16,9 +16,12 @@ namespace lil {
 struct AtCompileTime {
 };
 
-template <uint8_t SIZE>
-class Str : public IArr<Str<SIZE>, char> {
-  char _data[SIZE];
+/** A resizable, fixed capacity ASCII string that uses no additional memory to store its size. max_size() for this type
+ * is 254+1, that is 254 characters + the null terminator.
+ */
+template <uint8_t Size>
+class Str : public IArr<Str<Size>, char> {
+  char _data[Size];
 
 public:
   Str()
@@ -26,6 +29,7 @@ public:
     clear();
   }
 
+  /** @brief scoobity */
   Str(const char* str, size_t sz = MAX_CHARS)
   {
     auto input_size     = Str::len(str, sz);
@@ -34,10 +38,10 @@ public:
     set_size_unsafe(truncated_size);
   }
 
-  constexpr Str(const char (&literal)[SIZE], AtCompileTime)
+  constexpr Str(const char (&literal)[Size], AtCompileTime)
       : _data{}
   {
-    Str::cpy(_data, literal, SIZE);
+    Str::cpy(_data, literal, Size);
   }
 
   template <typename TStr>
@@ -141,9 +145,9 @@ public:
   constexpr Str& erase(size_t index, size_t count)
   {
     auto erase_point = minimum(index, size());
-    auto move_size   = size() - erase_point;
     auto erase_size  = minimum(count, size() - index);
-    memmove(&_data[erase_point], &_data[erase_point + erase_size], size() - index);
+    auto move_size   = size() - erase_point - erase_size;
+    memmove(&_data[erase_point], &_data[erase_point + erase_size], move_size);
     modify_size(-erase_size);
 
     return *this;
@@ -194,23 +198,23 @@ public:
   }
 
 private:
-  static_assert(SIZE >= 1, "Str must hold at least the null terminator");
-  static constexpr size_t MAX_CHARS = SIZE - sizeof('\0');  ///< Maximum number of non-null terminator characters that can be stored. This is the index of the final character.
+  static_assert(Size >= 1, "Str must hold at least the null terminator");
+  static constexpr size_t MAX_CHARS = Size - sizeof('\0');  ///< Maximum number of non-null terminator characters that can be stored. This is the index of the final character.
 };
 
-template <uint8_t SIZE>
-constexpr size_t Str<SIZE>::MAX_CHARS;
+template <uint8_t Size>
+constexpr size_t Str<Size>::MAX_CHARS;
 
-template <uint8_t SIZE>
-static constexpr Str<SIZE> str_literal(const char (&literal)[SIZE])
+template <uint8_t Size>
+static constexpr Str<Size> str_literal(const char (&literal)[Size])
 {
-  return Str<SIZE>(literal, AtCompileTime{});
+  return Str<Size>(literal, AtCompileTime{});
 }
 
-template <uint8_t LSIZE, uint8_t RSIZE>
-constexpr auto operator%(const Str<LSIZE>& lhs, const Str<RSIZE>& rhs)
+template <uint8_t LSize, uint8_t RSize>
+constexpr auto operator%(const Str<LSize>& lhs, const Str<RSize>& rhs)
 {
-  Str<LSIZE + RSIZE - sizeof('\0')> concatenated = "";
+  Str<LSize + RSize - sizeof('\0')> concatenated = "";
   return concatenated.append(lhs)
     .append(rhs);
 }
