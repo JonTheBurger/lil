@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 set(CPACK_PACKAGE_VENDOR "humanity")
+#$file($line) : $text
+#$file:$line: $text
 
 #==============================================================================#
 # Check if ${PROJECT_NAME} is being included as a sub-folder
@@ -15,6 +17,7 @@ endif()
 # Set default directory output options
 #==============================================================================#
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
@@ -77,9 +80,12 @@ add_build_conf(
 )
 
 #==============================================================================#
-#
+# Compiler and Linker Settings
 #==============================================================================#
 find_package(CCache)
+find_package(Linker)
+set_project_linker(lld)
+enable_link_time_optimization(CONFIG Release)
 
 #==============================================================================#
 # Documentation
@@ -89,6 +95,7 @@ if (${PROJECT_NAME}_BUILD_DOCS)
 find_package(Doxygen)
 set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
 configure_file(${PROJECT_SOURCE_DIR}/docs/Doxyfile.in ${DOXYGEN_OUTPUT_DIRECTORY}/Doxyfile)
+# TODO: custom target DEPENDS on custom command that generates Doxyfile, use output as stamp
 add_custom_target(${PROJECT_NAME}.doxygen.xml
   COMMAND
     Doxygen::doxygen ${PROJECT_BINARY_DIR}/docs/Doxyfile --verbose

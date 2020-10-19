@@ -33,7 +33,7 @@ exhale_args = {
     "containmentFolder":     "@DOXYGEN_OUTPUT_DIRECTORY@/source/api",
     "rootFileName":          "library_root.rst",
     "rootFileTitle":         "Library API",
-    "doxygenStripFromPath":  "..",
+    "doxygenStripFromPath":  "@PROJECT_SOURCE_DIR@",
     # Suggested optional arguments
     "createTreeView":        True,
     # TIP: if using the sphinx-bootstrap-theme, you need
@@ -49,7 +49,7 @@ exhale_args = {
 # ones.
 extensions = [
     'breathe',
-#    'exhale',
+    'exhale',
     'sphinx_rtd_theme'
 ]
 

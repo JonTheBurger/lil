@@ -2,6 +2,8 @@
 Checks: >
     *,
     -cppcoreguidelines-avoid-c-arrays,
+    -google-runtime-references,
+    -fuchsia-default-arguments-calls,
     -fuchsia-trailing-return,
     -hicpp-avoid-c-arrays,
     -modernize-avoid-c-arrays,
