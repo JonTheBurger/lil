@@ -14,7 +14,7 @@ else()
 endif()
 
 #==============================================================================#
-# Set default directory output options
+# Set default directory and output options
 #==============================================================================#
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -84,7 +84,7 @@ add_build_conf(
 #==============================================================================#
 find_package(CCache)
 find_package(Linker)
-set_project_linker(lld)
+set_preferred_linker(lld)
 enable_link_time_optimization(CONFIG Release)
 
 #==============================================================================#

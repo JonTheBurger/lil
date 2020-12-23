@@ -10,14 +10,14 @@ Example Usages:
 .. code-block:: cmake
 
   find_package(Linker)
-  set_project_linker(lld)
+  set_preferred_linker(lld)
   enable_link_time_optimization(CONFIG Release)
 
 Functions
 ^^^^^^^^^
 #]=======================================================================]
 cmake_minimum_required(VERSION 3.9.4)
-if(_findLinkerIncluded)
+if (_findLinkerIncluded)
   return()
 endif()
 set(_findLinkerIncluded TRUE)
@@ -28,13 +28,13 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT ltoSupported OUTPUT ltoError)
 
 #[=======================================================================[.rst:
-.. command:: set_project_linker
+.. command:: set_preferred_linker
 
   If possible, overrides the project linker.
 
   Signatures::
 
-    set_project_linker(
+    set_preferred_linker(
       NAME <name>
     )
 
@@ -47,11 +47,11 @@ check_ipo_supported(RESULT ltoSupported OUTPUT ltoError)
 
   .. code-block:: cmake
 
-  set_project_linker(gold)
+  set_preferred_linker(gold)
 
 #]=======================================================================]
-function(set_project_linker NAME)
-  list(APPEND CMAKE_MESSAGE_INDENT "[FindLinker::set_project_linker] ")
+function(set_preferred_linker NAME)
+  list(APPEND CMAKE_MESSAGE_INDENT "[FindLinker::set_preferred_linker] ")
 
   find_program(${PROJECT_NAME}_LINKER_EXECUTABLE ${NAME})
   if (NOT ${PROJECT_NAME}_LINKER_EXECUTABLE)

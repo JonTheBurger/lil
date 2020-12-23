@@ -19,10 +19,13 @@ Example Usages:
 
   find_package(CCache)
 #]=======================================================================]
-cmake_minimum_required(VERSION 3.10)
-include_guard(GLOBAL)
+cmake_minimum_required(VERSION 3.4)
+if (_findCCacheIncluded)
+  return()
+endif()
+set(_findCCacheIncluded TRUE)
 
-option(CCACHE_ENABLE "Use compiler caching to speed up later compilation" ON)
+option(CCACHE_ENABLE "Use compiler caching to speed up recompilation" ON)
 
 find_program(CCACHE_EXECUTABLE ccache)
 if (CCACHE_EXECUTABLE AND CCACHE_ENABLE)
