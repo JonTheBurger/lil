@@ -15,10 +15,7 @@ Functions
 ^^^^^^^^^
 #]=======================================================================]
 cmake_minimum_required(VERSION 3.13) # target_link_options
-if (_embeddedSystemIncluded)
-  return()
-endif()
-set(_embeddedSystemIncluded TRUE)
+include_guard(GLOBAL)
 
 message(STATUS "MCU_INFO: {
   \"MCU_VENDOR\": \"${MCU_VENDOR}\",

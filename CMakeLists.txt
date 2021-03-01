@@ -17,3 +17,5 @@ if (${${PROJECT_NAME}_BUILD_TESTS})
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+#finalize_project()

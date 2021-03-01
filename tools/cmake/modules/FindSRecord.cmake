@@ -135,7 +135,7 @@ foreach(component ${${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS})
       )
 
       # Parse the version
-      string(REGEX MATCH "[0-9]+(\.[0-9]+)*" ${CMAKE_FIND_PACKAGE_NAME}_VERSION "${packageVersion}")
+      string(REGEX MATCH "[0-9]+(\\.[0-9]+)*" ${CMAKE_FIND_PACKAGE_NAME}_VERSION "${packageVersion}")
       # Pad with zeroes so minor/patch/tweak are filled in automatically; no major becomes error; convert to list
       string(REPLACE "." ";" versionNumbers "${${CMAKE_FIND_PACKAGE_NAME}_VERSION}.0.0.0")
       list(GET versionNumbers 0 ${CMAKE_FIND_PACKAGE_NAME}_VERSION_MAJOR)
