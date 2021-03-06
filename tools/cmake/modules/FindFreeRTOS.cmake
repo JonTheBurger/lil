@@ -178,7 +178,7 @@ if (FreeRTOS_ROOT)
     )
     # Add the heap the user wants to use
     set(freertosHeaps 1 2 3 4 5)
-    set(FreeRtosDemo 3 CACHE STRING "FreeRTOS Heap Implementation")
+    set(FreeRTOS_HEAP 3 CACHE STRING "FreeRTOS Heap Implementation")
     if (FreeRTOS_HEAP IN_LIST freertosHeaps)
       target_sources(FreeRTOS_Kernel PRIVATE ${FreeRTOS_ROOT}/portable/MemMang/heap_${FreeRTOS_HEAP}.c)
     endif()
@@ -230,12 +230,8 @@ if (FreeRTOS_ROOT)
  Your gdbinit file (located at $ENV{HOME}/.gdbinit) either does not exist or
  is missing the following 2 lines required for debugging the FreeRTOS Linux
  Simulator properly:
-
  handle SIGUSR1 nostop noignore noprint
  handle SIGALRM nostop noignore noprint
- # Not listed in FreeRTOS docs, but also recommended
- # handle SIGSTOP nostop noignore noprint
-
  For more details, see:
  https://www.freertos.org/FreeRTOS-simulator-for-Linux.html#gdb_debugging_tips")
       endif()
