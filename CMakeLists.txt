@@ -9,7 +9,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/tools/cmake/modules)
 include(BaseProject)
-include(CMakePrintHelpers)
 
 add_library(${PROJECT_NAME}
   ${CMAKE_CURRENT_LIST_DIR}/src/lil/Err.cpp
@@ -28,6 +27,7 @@ target_include_directories(${PROJECT_NAME}
 target_install_package(${PROJECT_NAME})
 
 if (${${PROJECT_NAME}_BUILD_TESTS})
+  # Prefer enable_testing over include(CTest) because CTest creates several targets we do not use
   enable_testing()
   add_subdirectory(tests)
 endif()
