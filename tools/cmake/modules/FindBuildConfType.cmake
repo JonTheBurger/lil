@@ -144,7 +144,7 @@ endfunction()
   Signatures::
 
     set_default_build_type(
-      ``<type>``
+      <type>
     )
 
   The options are:

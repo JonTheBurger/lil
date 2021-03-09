@@ -9,6 +9,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/tools/cmake/modules)
 include(BaseProject)
+include(GenerateExportHeader)
 
 add_library(${PROJECT_NAME}
   ${CMAKE_CURRENT_LIST_DIR}/src/lil/Err.cpp
@@ -19,11 +20,21 @@ add_library(${PROJECT_NAME}
   ${CMAKE_CURRENT_LIST_DIR}/include/lil/Str.hpp
   ${CMAKE_CURRENT_LIST_DIR}/include/lil/detail/IArr.hpp
 )
+generate_export_header(${PROJECT_NAME}
+  EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}.export.h
+)
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
 )
+#add_library(${PROJECT_NAME}.config)
+#target_precompile_headers(${PROJECT_NAME}
+#  PRIVATE
+#    $<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:<PrecompiledHeader.hpp$<ANGLE-R>>>
+#    $<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:C>:<PrecompiledHeader.h$<ANGLE-R>>>
+#)
+#target_precompile_headers(${PROJECT_NAME}.config REUSE_FROM ${PROJECT_NAME}.pch)
 target_install_package(${PROJECT_NAME})
 
 if (${${PROJECT_NAME}_BUILD_TESTS})
