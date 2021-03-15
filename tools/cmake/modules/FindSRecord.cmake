@@ -150,7 +150,6 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(${CMAKE_FIND_PACKAGE_NAME}
   HANDLE_COMPONENTS
-  HANDLE_VERSION_RANGE
   NAME_MISMATCHED
   REASON_FAILURE_MESSAGE
     "Ubuntu: Consider running `sudo apt-get install srecord`"

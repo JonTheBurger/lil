@@ -10,11 +10,7 @@ Example Usages:
 .. code-block:: cmake
 
   find_package(BuildConfType)
-  add_build_conf(
-    NAME     ASan
-    COMPILER Clang|GNU
-    FLAGS    -fsanitize=address,leak
-  )
+  add_build_type(ASan)
   set_default_build_type(Debug)
 
 Functions
@@ -32,129 +28,22 @@ if (NOT buildTypes)
 endif()
 
 #[=======================================================================[.rst:
-.. command:: add_build_conf
-
-  Adds a new :variable:`CMAKE_BUILD_TYPE` and :variable:`CMAKE_CONFIGURATION_TYPES`
-  with the provided flags.
-
-  Signatures::
-
-    add_build_conf(
-      NAME <name>
-      [COMPILER <pattern>]
-      [DOC <docstring>]
-      FLAGS <flag1> [<flag2> ...]
-    )
-
-  The options are:
-
-  ``NAME <name>``
-  Name of the new Build Type/Configuration. Uppercase <NAME> is used for :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`, and
-  lowercase <name> is used for :prop_tgt:`<CONFIG>_POSTFIX`.
-
-  ``COMPILER <pattern>``
-  Pattern matching compilers that provided ``FLAGS`` can be used for. If not set, compiler is used to verify each flag
-  and check that it is supported. Unsupported flags are then dropped.
-
-  ``DOC <docstring>``
-  Docstring to add to :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` in the CMake Cache.
-
-  ``FLAGS <flag1> [<flag2> ...]``
-  Compiler flags to apply to the given Build Type/Configuration.
-
-  Example usage:
-
-  .. code-block:: cmake
-
-  add_build_conf(
-    NAME     Profile
-    COMPILER Clang|GNU
-    DOC      "Compile with profiling support"
-    FLAGS    -p -g -O2
-  )
-#]=======================================================================]
-function(add_build_conf)
-  list(APPEND CMAKE_MESSAGE_INDENT "[FindBuildConfType::add_build_conf] ")
-  message(VERBOSE "(${ARGV})")
-  set(optArgs)
-  set(oneValueArgs NAME COMPILER DOC)
-  set(multiValueArgs FLAGS)
-  cmake_parse_arguments(arg "${optArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  if (NOT arg_NAME)
-    message(FATAL_ERROR "requires: NAME <argument>")
-  endif()
-
-  # If Build/Configuration flags are only valid for certain compilers, skip for non-compliant compilers
-  if (arg_COMPILER)
-    if (NOT ${CMAKE_C_COMPILER_ID} MATCHES ${arg_COMPILER})
-      message(VERBOSE "Ignoring flags for ${arg_COMPILER}")
-      return()
-    endif()
-  # Otherwise, automatically see which flags are valid for the given compiler
-  else()
-    set(supportedFlags "")
-    foreach(flag ${arg_FLAGS})
-      string(REGEX REPLACE "[^a-zA-Z0-9]" "" ${flag}Ok ${flag})
-      check_c_compiler_flag(${flag} ${flag}Ok)
-      if (${${flag}Ok})
-        list(APPEND supportedFlags ${flag})
-      endif()
-    endforeach()
-    set(arg_FLAGS ${supportedFlags})
-    message(VERBOSE "Supported flags: ${supportedFlags}")
-  endif()
-
-  # Add flags for given Build/Configuration to CMakeCache.txt
-  string(TOUPPER ${arg_NAME} uppername)
-  string(REPLACE ";" " " flags "${arg_FLAGS}")
-  set(CMAKE_C_FLAGS_${uppername}             "${flags}" CACHE STRING "${arg_DOC}" FORCE)
-  set(CMAKE_CXX_FLAGS_${uppername}           "${flags}" CACHE STRING "${arg_DOC}" FORCE)
-  set(CMAKE_EXE_LINKER_FLAGS_${uppername}    "${flags}" CACHE STRING "${arg_DOC}" FORCE)
-  set(CMAKE_SHARED_LINKER_FLAGS_${uppername} "${flags}" CACHE STRING "${arg_DOC}" FORCE)
-  set(CMAKE_MODULE_LINKER_FLAGS_${uppername} "${flags}" CACHE STRING "${arg_DOC}" FORCE)
-  mark_as_advanced(CMAKE_C_FLAGS_${uppername})
-  mark_as_advanced(CMAKE_CXX_FLAGS_${uppername})
-  mark_as_advanced(CMAKE_EXE_LINKER_FLAGS_${uppername})
-  mark_as_advanced(CMAKE_SHARED_LINKER_FLAGS_${uppername})
-  mark_as_advanced(CMAKE_MODULE_LINKER_FLAGS_${uppername})
-
-  # Add to CMAKE_BUILD_TYPE combobox
-  get_property(buildTypes CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS)
-  if (NOT "${arg_NAME}" IN_LIST buildTypes)
-    list(APPEND buildTypes "${arg_NAME}")
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${buildTypes})
-  endif()
-
-  # Add to CMAKE_CONFIGURATION_TYPES for multi-config generators (Visual Studio, XCode, Ninja-Multi)
-  get_property(isMultiConf GLOBAL PROPERTY GENERATOR_IS_MULTICONFIG)
-  if (isMultiConf)
-    if (NOT "${arg_NAME}" IN_LIST CMAKE_CONFIGURATION_TYPES)
-      set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES};${arg_NAME}" CACHE STRING "Semicolon separated list of supported configuration types" FORCE)
-      string(TOLOWER ${arg_NAME} lowername)
-      set(CMAKE_${uppername}_POSTFIX _${lowername})
-    endif()
-  endif()
-endfunction()
-
-#[=======================================================================[.rst:
 .. command:: set_default_build_type
 
   Sets the :variable:`CMAKE_BUILD_TYPE` to a particular ``TYPE`` if none is supplied by the user.
 
   Signatures::
 
-    set_default_build_type(
-      <type>
-    )
+    set_default_build_type(<type>)
 
   The options are:
 
   ``<type>``
-  Name of the Build Type/Configuration to set if currently unset.
+  Name of the Build Type/Configuration to set if currently unset. Prefer ``PascalCase`` such as ``RelWithDebInfo``.
 
   Example usage:
 
-  .. code-block:: cmake
+.. code-block:: cmake
 
   set_default_build_type(Debug)
 #]=======================================================================]
@@ -167,5 +56,189 @@ function(set_default_build_type)
 
   if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE ${ARGV0} CACHE STRING "" FORCE)
+  endif()
+endfunction()
+
+#[=======================================================================[.rst:
+.. command:: add_build_type
+
+  Adds a new :variable:`CMAKE_BUILD_TYPE` and :variable:`CMAKE_CONFIGURATION_TYPES`.
+
+  Signatures::
+
+    add_build_type(<name>)
+
+  The options are:
+
+  ``<name>``
+  Name of the new Build Type/Configuration. Prefer ``PascalCase`` such as ``RelWithDebInfo``. Uppercase <name> will be
+  used for :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`, and lowercase <name> for :prop_tgt:`<CONFIG>_POSTFIX`.
+
+
+  Example usage:
+
+.. code-block:: cmake
+
+  add_build_type(Profile)
+#]=======================================================================]
+function(add_build_type NAME)
+  string(TOUPPER ${NAME} uppername)
+  string(TOLOWER ${NAME} lowername)
+
+  # Add to CMAKE_BUILD_TYPE combobox
+  get_property(buildTypes CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS)
+  if (NOT "${NAME}" IN_LIST buildTypes)
+    list(APPEND buildTypes "${NAME}")
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${buildTypes})
+  endif()
+
+  # Add to CMAKE_CONFIGURATION_TYPES for multi-config generators (Visual Studio, XCode, Ninja-Multi)
+  get_property(isMultiConf GLOBAL PROPERTY GENERATOR_IS_MULTICONFIG)
+  if (isMultiConf)
+    if (NOT "${NAME}" IN_LIST CMAKE_CONFIGURATION_TYPES)
+      set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES};${NAME}" CACHE STRING "Semicolon separated list of supported configuration types" FORCE)
+      string(TOLOWER ${NAME} lowername)
+      set(CMAKE_${uppername}_POSTFIX _${lowername})
+    endif()
+  endif()
+endfunction()
+
+#[=======================================================================[.rst:
+.. command:: set_build_flags
+
+  Sets the flags for a given build type/configuration.
+
+  Signatures::
+
+    set_build_flags(
+      <name>
+      [COMPILER <pattern>]
+      [FLAGS <flag1> [<flag2> ...]]
+      [CFLAGS <flag1> [<flag2> ...]]
+      [LFLAGS <flag1> [<flag2> ...]]
+      [CACHE]
+      [DOC <docstring>]
+      [ALLOW_BAD_NEIGHBOR]
+    )
+
+  The options are:
+
+  ``<name>``
+  Name of the Build Type/Configuration to set flags for.
+
+  ``COMPILER <pattern>``
+  Pattern matching compilers that provided flags can be used for. If not set, compiler (and linker if CMake >= 3.18)
+  is used to verify each flag and check that it is supported. Unsupported flags are then dropped.
+  .. note:: Generator expressions are only supported if COMPILER is explicitly set.
+
+  ``FLAGS <flag1> [<flag2> ...]``
+  List of flags to apply to both the linker and compiler for the given Build Type/Configuration.
+
+  ``CFLAGS <flag1> [<flag2> ...]``
+  List of flags to apply only to the compiler for the given Build Type/Configuration.
+
+  ``LFLAGS <flag1> [<flag2> ...]``
+  List of flags to apply only to the linker for the given Build Type/Configuration.
+
+  ``CACHE``
+  Set :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` in the CMake cache. Cache set is FORCED if this is the top level project.
+
+  ``DOC <docstring>``
+  Docstring to add to :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` in the CMake Cache.
+
+  ``ALLOW_BAD_NEIGHBOR``
+  Forces setting of the CACHE even if this is not the top level project. This is a bad thing to do as a library.
+
+  Example usage:
+
+.. code-block:: cmake
+
+  add_build_type(Profile)
+  set_build_flags(Profile
+    CFLAGS
+      -p -g -O2
+    COMPILER
+      GNU|Clang
+    DOC
+      "Compile with profiling support"
+    CACHE
+  )
+#]=======================================================================]
+function(set_build_flags NAME)
+  list(APPEND CMAKE_MESSAGE_INDENT "[FindBuildConfType::set_build_flags] ")
+  message(VERBOSE "(${ARGV})")
+  set(optArgs CACHE ALLOW_BAD_NEIGHBOR)
+  set(oneValueArgs NAME COMPILER)
+  set(multiValueArgs FLAGS CFLAGS LFLAGS)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${optArgs}" "${oneValueArgs}" "${multiValueArgs}")
+
+  if (arg_COMPILER)
+    # If flags are specified as only valid for certain compilers, skip for non-matching compilers.
+    if (NOT ${CMAKE_C_COMPILER_ID} MATCHES ${arg_COMPILER})
+      message(VERBOSE "Ignoring flags for ${arg_COMPILER}")
+      return()
+    endif()
+    # Otherwise trust the user's provided flags. CMAKE_<LANG>_FLAGS must be a string rather than a list.
+    string(REPLACE ";" " " cflags "${arg_CFLAGS}")
+    string(REPLACE ";" " " lflags "${arg_LFLAGS}")
+  else()
+    # If the user did not specify a valid compiler, automatically deduce which flags are valid.
+    set(cflags "")
+    foreach(flag IN LISTS arg_FLAGS arg_CFLAGS)
+      check_c_compiler_flag(${flag} ok)
+      if (ok)
+        list(APPEND cflags ${flag})
+      endif()
+    endforeach()
+
+    # Check linker flags as well.
+    set(lflags "")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+      # But only if our cmake version is new enough to support checking.
+      include(CheckLinkerFlag)
+      foreach(flag IN LISTS arg_FLAGS arg_LFLAGS)
+        check_linker_flag(CXX ${flag} ok)
+        if (ok)
+          list(APPEND lflags ${flag})
+        endif()
+      endforeach()
+    else()
+      # If cmake is too old, pretend all flags passed the check.
+      set(lflags ${arg_FLAGS} ${arg_LFLAGS})
+    endif()
+
+    # Turn arg lists into strings. CMAKE_<LANG>_FLAGS must be a string rather than a list.
+    string(REPLACE ";" " " cflags "${cflags}")
+    string(REPLACE ";" " " lflags "${lflags}")
+  endif()
+
+  if (arg_CACHE)
+    # Create a default docstring if one is not provided by the user.
+    if (NOT arg_DOC)
+      set(arg_DOC "Overridden by ${PROJECT_NAME}")
+    endif()
+    # If the user requested to set cached variables, then attempt to do so.
+    set(setFlagArguments CACHE STRING "${arg_DOC}")
+    if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR arg_ALLOW_BAD_NEIGHBOR)
+      # If the user's project is the top level project, forceably override.
+      # Sub-projects may also override if they admit they are being a bad neighboar.
+      list(APPEND setFlagArguments FORCE)
+    endif()
+  endif()
+
+  string(TOUPPER ${NAME} uppername)
+
+  set(CMAKE_C_FLAGS_${uppercase}             "${cflags}" ${setFlagArguments})
+  set(CMAKE_CXX_FLAGS_${uppercase}           "${cflags}" ${setFlagArguments})
+  set(CMAKE_EXE_LINKER_FLAGS_${uppercase}    "${lflags}" ${setFlagArguments})
+  set(CMAKE_SHARED_LINKER_FLAGS_${uppercase} "${lflags}" ${setFlagArguments})
+  set(CMAKE_MODULE_LINKER_FLAGS_${uppercase} "${lflags}" ${setFlagArguments})
+
+  if (arg_CACHE)
+    mark_as_advanced(CMAKE_C_FLAGS_${uppercase})
+    mark_as_advanced(CMAKE_CXX_FLAGS_${uppercase})
+    mark_as_advanced(CMAKE_EXE_LINKER_FLAGS_${uppercase})
+    mark_as_advanced(CMAKE_SHARED_LINKER_FLAGS_${uppercase})
+    mark_as_advanced(CMAKE_MODULE_LINKER_FLAGS_${uppercase})
   endif()
 endfunction()

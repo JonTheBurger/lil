@@ -117,27 +117,22 @@ if (isProjectMaintainer)
   add_build_conf(
     NAME     ASan
     COMPILER Clang|GNU
-    FLAGS    -fsanitize=address,leak -g
+    FLAGS    -fsanitize=address,leak,undefined -fno-omit-frame-pointer -g
   )
   add_build_conf(
     NAME     MSan
-    COMPILER Clang|GNU
-    FLAGS    -fsanitize=memory
+    COMPILER Clang
+    FLAGS    -fsanitize=memory,undefined -fno-omit-frame-pointer -g
   )
   add_build_conf(
     NAME     TSan
     COMPILER Clang|GNU
-    FLAGS    -fsanitize=thread
-  )
-  add_build_conf(
-    NAME     UBSan
-    COMPILER Clang|GNU
-    FLAGS    -fsanitize=undefined
+    FLAGS    -fsanitize=thread,undefined -fno-omit-frame-pointer -g
   )
   add_build_conf(
     NAME     Fuzz
-    COMPILER Clang|GNU
-    FLAGS    -fsanitize=fuzzer,address,leak
+    COMPILER Clang
+    FLAGS    -fsanitize=fuzzer,memory,undefined
   )
 elseif (${PROJECT_NAME}_IS_MAIN_PROJECT)
   set_default_build_type(Release)
