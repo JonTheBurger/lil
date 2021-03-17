@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 set(CPACK_PACKAGE_VENDOR "humanity")
-#$file($line) : $text
-#$file:$line: $text
 
 #==============================================================================#
 # Check if ${PROJECT_NAME} is being included as a sub-folder
@@ -88,53 +86,48 @@ set(CMAKE_INSTALL_RPATH ${originPath} ${originPath}/${relativeBinToLibDir})
 set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 
 # Create uninstall target
-if(NOT TARGET uninstall)
-  configure_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake_uninstall.cmake.in"
-    "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake"
-    @ONLY
-  )
-
+configure_file(
+  "${CMAKE_CURRENT_LIST_DIR}/cmake_uninstall.cmake.in"
+  "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake"
+  @ONLY
+)
+add_custom_target(${PROJECT_NAME}.uninstall COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake)
+if(${PROJECT_NAME}_IS_MAIN_PROJECT)
   add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
 #==============================================================================#
 # Add custom CMake Build Type/Configurations
 #==============================================================================#
-find_package(BuildConfType)
 if (isProjectMaintainer)
-  find_package(CCache)
-  find_package(Linker)
+  find_package(BuildConfType)
   set_default_build_type(Debug)
+  add_build_type(Profile)
+  set_build_flags(Profile
+    COMPILER Clang|GNU
+    CFLAGS   -p -g -O2
+    DOC      "Compile with profiling support"
+    CACHE
+  )
+
+  find_package(Linker)
   set_preferred_linker(lld)
   enable_link_time_optimization(CONFIG Release)
 
-  add_build_conf(
-    NAME     Profile
-    COMPILER Clang|GNU
-    FLAGS    -p -g -O2
-  )
-  add_build_conf(
-    NAME     ASan
-    COMPILER Clang|GNU
-    FLAGS    -fsanitize=address,leak,undefined -fno-omit-frame-pointer -g
-  )
-  add_build_conf(
-    NAME     MSan
-    COMPILER Clang
-    FLAGS    -fsanitize=memory,undefined -fno-omit-frame-pointer -g
-  )
-  add_build_conf(
-    NAME     TSan
-    COMPILER Clang|GNU
-    FLAGS    -fsanitize=thread,undefined -fno-omit-frame-pointer -g
-  )
-  add_build_conf(
-    NAME     Fuzz
-    COMPILER Clang
-    FLAGS    -fsanitize=fuzzer,memory,undefined
-  )
+  find_package(Sanitizers)
+  if (${PROJECT_NAME}_ENABLE_ASAN)
+    link_libraries(Sanitizers::ASAN)
+  endif()
+  if (${PROJECT_NAME}_ENABLE_TSAN)
+    link_libraries(Sanitizers::TSAN)
+  endif()
+  if (${PROJECT_NAME}_ENABLE_MSAN)
+    link_libraries(Sanitizers::MSAN)
+  endif()
+
+  find_package(CCache)
 elseif (${PROJECT_NAME}_IS_MAIN_PROJECT)
+  find_package(BuildConfType)
   set_default_build_type(Release)
 endif()
 
@@ -142,5 +135,7 @@ endif()
 # Documentation
 #==============================================================================#
 if (${PROJECT_NAME}_BUILD_DOCS)
+  #$file($line) : $text
+  #$file:$line: $text
   find_package(Documentation)
 endif()

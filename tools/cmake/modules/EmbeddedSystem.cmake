@@ -18,11 +18,36 @@ cmake_minimum_required(VERSION 3.11)
 include_guard(GLOBAL)
 
 macro(get_mcu_info OUTPUT_VAR)
+  # https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html
+
+  # Example: https://www.st.com/en/microcontrollers-microprocessors.html
+  # VENDOR: ST
+  # BOARD:  STM32F205RBT6
+  # LINE:   STM32F205xx
+  # FAMILY: STM32
+  # SERIES: F2
+  # CPU:    cortex-m3
+  # ARCH:   armv7
+  # FPU:    neon
+  # FLOAT_ABI: hard
+
+  # Example: https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus:GENERAL-PURPOSE-MCUS
+  # VENDOR: NXP
+  # BOARD:  LPC11U37H
+  # LINE:   LPC
+  # FAMILY: LPC11Uxx
+  # SERIES: LPC1100
+  # CPU:    cortex-m0plus
+  # ARCH:   armv6-m
+  # FPU:    auto
+  # FLOAT_ABI: soft
+
   set(${OUTPUT_VAR} "MCU_INFO: {
     \"MCU_VENDOR\": \"${MCU_VENDOR}\",
     \"MCU_BOARD\": \"${MCU_BOARD}\",
-    \"MCU_SERIES\": \"${MCU_SERIES}\",
+    \"MCU_LINE\": \"${MCU_LINE}\",
     \"MCU_FAMILY\": \"${MCU_FAMILY}\",
+    \"MCU_SERIES\": \"${MCU_SERIES}\",
     \"MCU_CPU\": \"${MCU_CPU}\",
     \"MCU_ARCH\": \"${MCU_ARCH}\",
     \"MCU_FPU\": \"${MCU_FPU}\",

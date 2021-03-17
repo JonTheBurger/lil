@@ -107,6 +107,8 @@ endfunction()
 .. command:: set_build_flags
 
   Sets the flags for a given build type/configuration.
+  .. note:: If you only want to add additional flags, use `command`:add_compile_options: or `command`:add_link_options:
+  with the generator expression ``$<CONFIG:cfgs>`` instead.
 
   Signatures::
 
@@ -153,14 +155,12 @@ endfunction()
 
 .. code-block:: cmake
 
+  find_package(BuildConfType)
   add_build_type(Profile)
   set_build_flags(Profile
-    CFLAGS
-      -p -g -O2
-    COMPILER
-      GNU|Clang
-    DOC
-      "Compile with profiling support"
+    COMPILER Clang|GNU
+    CFLAGS   -p -g -O2
+    DOC      "Compile with profiling support"
     CACHE
   )
 #]=======================================================================]
