@@ -118,7 +118,7 @@ endfunction()
       [FLAGS <flag1> [<flag2> ...]]
       [CFLAGS <flag1> [<flag2> ...]]
       [LFLAGS <flag1> [<flag2> ...]]
-      [CACHE]
+      [NO_CACHE]
       [DOC <docstring>]
       [ALLOW_BAD_NEIGHBOR]
     )
@@ -142,8 +142,9 @@ endfunction()
   ``LFLAGS <flag1> [<flag2> ...]``
   List of flags to apply only to the linker for the given Build Type/Configuration.
 
-  ``CACHE``
-  Set :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` in the CMake cache. Cache set is FORCED if this is the top level project.
+  ``NO_CACHE``
+  Prevents setting :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` in the CMake cache.
+  Cache sets are FORCED if this is the top level project.
 
   ``DOC <docstring>``
   Docstring to add to :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` in the CMake Cache.
@@ -161,13 +162,12 @@ endfunction()
     COMPILER Clang|GNU
     CFLAGS   -p -g -O2
     DOC      "Compile with profiling support"
-    CACHE
   )
 #]=======================================================================]
 function(set_build_flags NAME)
   list(APPEND CMAKE_MESSAGE_INDENT "[FindBuildConfType::set_build_flags] ")
   message(VERBOSE "(${ARGV})")
-  set(optArgs CACHE ALLOW_BAD_NEIGHBOR)
+  set(optArgs NO_CACHE ALLOW_BAD_NEIGHBOR)
   set(oneValueArgs NAME COMPILER)
   set(multiValueArgs FLAGS CFLAGS LFLAGS)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${optArgs}" "${oneValueArgs}" "${multiValueArgs}")
@@ -185,9 +185,11 @@ function(set_build_flags NAME)
     # If the user did not specify a valid compiler, automatically deduce which flags are valid.
     set(cflags "")
     foreach(flag IN LISTS arg_FLAGS arg_CFLAGS)
-      check_c_compiler_flag(${flag} ok)
-      if (ok)
+      string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+      check_c_compiler_flag(${flag} ${this_cflag_supported})
+      if (${this_cflag_supported})
         list(APPEND cflags ${flag})
+        set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
       endif()
     endforeach()
 
@@ -197,9 +199,11 @@ function(set_build_flags NAME)
       # But only if our cmake version is new enough to support checking.
       include(CheckLinkerFlag)
       foreach(flag IN LISTS arg_FLAGS arg_LFLAGS)
-        check_linker_flag(CXX ${flag} ok)
-        if (ok)
+        string(MAKE_C_IDENTIFIER ${flag}_lflag_supported this_lflag_supported)
+        check_linker_flag(CXX ${flag} ${this_lflag_supported})
+        if (${this_lflag_supported})
           list(APPEND lflags ${flag})
+          set(${this_lflag_supported} "" CACHE INTERNAL "" FORCE)
         endif()
       endforeach()
     else()
@@ -212,7 +216,7 @@ function(set_build_flags NAME)
     string(REPLACE ";" " " lflags "${lflags}")
   endif()
 
-  if (arg_CACHE)
+  if (NOT arg_NO_CACHE)
     # Create a default docstring if one is not provided by the user.
     if (NOT arg_DOC)
       set(arg_DOC "Overridden by ${PROJECT_NAME}")

@@ -4,19 +4,21 @@ set(CPACK_PACKAGE_VENDOR "humanity")
 #==============================================================================#
 # Check if ${PROJECT_NAME} is being included as a sub-folder
 #==============================================================================#
-set(${${PROJECT_NAME}_IS_MAIN_PROJECT} FALSE)
-if (CMAKE_PROJECT_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-  set(${${PROJECT_NAME}_IS_MAIN_PROJECT} TRUE)
+set(${PROJECT_NAME}_IS_MAIN_PROJECT FALSE)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+  set(${PROJECT_NAME}_IS_MAIN_PROJECT TRUE)
 endif()
 
 #==============================================================================#
 # Provide User Options; guess sane defaults
 #==============================================================================#
 if (${PROJECT_NAME}_IS_MAIN_PROJECT AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  # TODO: Put this in cache
   set(isProjectMaintainer ON)
 else()
   set(isProjectMaintainer OFF)
 endif()
+set(isProjectMaintainer ON)
 
 option(${PROJECT_NAME}_BUILD_DOCS
   "Build tests for ${PROJECT_NAME}"
@@ -92,7 +94,7 @@ configure_file(
   @ONLY
 )
 add_custom_target(${PROJECT_NAME}.uninstall COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake)
-if(${PROJECT_NAME}_IS_MAIN_PROJECT)
+if(${PROJECT_NAME}_IS_MAIN_PROJECT AND NOT TARGET uninstall)
   add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
@@ -105,7 +107,7 @@ if (isProjectMaintainer)
   add_build_type(Profile)
   set_build_flags(Profile
     COMPILER Clang|GNU
-    CFLAGS   -p -g -O2
+    CFLAGS   -p -g -pg -O2
     DOC      "Compile with profiling support"
     CACHE
   )
@@ -116,13 +118,23 @@ if (isProjectMaintainer)
 
   find_package(Sanitizers)
   if (${PROJECT_NAME}_ENABLE_ASAN)
-    link_libraries(Sanitizers::ASAN)
+#    list(APPEND LINK_LIRARIES Sanitizers::ASAN)
+#    link_libraries($<LINK_ONLY:Sanitizers::ASAN>)
+#    link_libraries($<BUILD_INTERFACE:Sanitizers::ASAN>)
   endif()
   if (${PROJECT_NAME}_ENABLE_TSAN)
     link_libraries(Sanitizers::TSAN)
   endif()
   if (${PROJECT_NAME}_ENABLE_MSAN)
     link_libraries(Sanitizers::MSAN)
+  endif()
+
+  find_package(ProfileGuidedOptimization)
+  if (${PROJECT_NAME}_ENABLE_PGO_GENERATE)
+    link_libraries(ProfileGuidedOptimization::Generate)
+  endif()
+  if (${PROJECT_NAME}_ENABLE_PGO_USE)
+    link_libraries(ProfileGuidedOptimization::Use)
   endif()
 
   find_package(CCache)

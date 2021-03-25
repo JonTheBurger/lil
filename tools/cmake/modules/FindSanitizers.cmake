@@ -129,6 +129,7 @@ Because UBSan is compatible with all other sanitizers, it does not receive an ag
 cmake_minimum_required(VERSION 3.13) # target_link_options
 include_guard(GLOBAL)
 include(CheckCCompilerFlag)
+include(CMakePushCheckState)
 
 # Set default components to ASAN if none specified
 if (NOT Sanitizers_FIND_COMPONENTS)
@@ -140,13 +141,21 @@ endif()
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS /fsanitize=address -fsanitize=address -fsanitize-address-use-after-scope)
-check_c_compiler_flag("${flag}" hasFlag)
-if (hasFlag)
-  list(APPEND Sanitizers_ADDRESS_FLAGS ${flag})
-endif()
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
+    list(APPEND Sanitizers_ADDRESS_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
+  endif()
+  cmake_pop_check_state(RESET)
+endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_address INTERFACE)
 target_compile_options(.sanitizers_address INTERFACE ${Sanitizers_ADDRESS_FLAGS})
+
 if (Sanitizers_ADDRESS_FLAGS)
   # If any flags worked, mark that we found ASAN
   set(Sanitizers_ASAN_FOUND TRUE)
@@ -163,11 +172,17 @@ add_library(Sanitizers::Address ALIAS .sanitizers_address)
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS /fsanitize=leak -fsanitize=leak)
-  check_c_compiler_flag("${flag}" hasFlag)
-  if (hasFlag)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
     list(APPEND Sanitizers_LEAK_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
   endif()
+  cmake_pop_check_state(RESET)
 endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_leak INTERFACE)
 target_compile_options(.sanitizers_leak INTERFACE ${Sanitizers_LEAK_FLAGS})
@@ -187,11 +202,17 @@ add_library(Sanitizers::Leak ALIAS .sanitizers_leak)
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS /fsanitize=undefined -fsanitize=undefined)
-  check_c_compiler_flag("${flag}" hasFlag)
-  if (hasFlag)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
     list(APPEND Sanitizers_UNDEFINED_BEHAVIOR_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
   endif()
+  cmake_pop_check_state(RESET)
 endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_undefined INTERFACE)
 target_compile_options(.sanitizers_undefined INTERFACE ${Sanitizers_UNDEFINED_FLAGS})
@@ -211,11 +232,17 @@ add_library(Sanitizers::Undefined ALIAS .sanitizers_undefined)
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS /fsanitize=thread -fsanitize=thread)
-  check_c_compiler_flag("${flag}" hasFlag)
-  if (hasFlag)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
     list(APPEND Sanitizers_THREAD_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
   endif()
+  cmake_pop_check_state(RESET)
 endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_thread INTERFACE)
 target_compile_options(.sanitizers_thread INTERFACE ${Sanitizers_THREAD_FLAGS})
@@ -235,11 +262,17 @@ add_library(Sanitizers::Thread ALIAS .sanitizers_thread)
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS /fsanitize=memory -fsanitize=memory)
-  check_c_compiler_flag("${flag}" hasFlag)
-  if (hasFlag)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
     list(APPEND Sanitizers_MEMORY_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
   endif()
+  cmake_pop_check_state(RESET)
 endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_memory INTERFACE)
 target_compile_options(.sanitizers_memory INTERFACE ${Sanitizers_MEMORY_FLAGS})
@@ -259,11 +292,17 @@ add_library(Sanitizers::Memory ALIAS .sanitizers_memory)
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS /fsanitize=fuzzer -fsanitize=fuzzer)
-  check_c_compiler_flag("${flag}" hasFlag)
-  if (hasFlag)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
     list(APPEND Sanitizers_FUZZER_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
   endif()
+  cmake_pop_check_state(RESET)
 endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_fuzzer INTERFACE)
 target_compile_options(.sanitizers_fuzzer INTERFACE ${Sanitizers_FUZZER_FLAGS})
@@ -283,14 +322,20 @@ add_library(Sanitizers::Fuzzer ALIAS .sanitizers_fuzzer)
 # ============================================================================ #
 # Check the possible compile flags
 foreach(flag IN ITEMS -fno-optimize-sibling-calls -fno-omit-frame-pointer -g /Zi)
-  check_c_compiler_flag("${flag}" hasFlag)
-  if (hasFlag)
-    list(APPEND SANITIZER_DEBUG_FLAGS ${flag})
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_FLAGS ${flag})
+  string(MAKE_C_IDENTIFIER ${flag}_cflag_supported this_cflag_supported)
+  check_c_compiler_flag(${flag} ${this_cflag_supported})
+  if (${this_cflag_supported})
+    list(APPEND Sanitizers_DEBUG_FLAGS ${flag})
+    set(${this_cflag_supported} "" CACHE INTERNAL "" FORCE)
   endif()
+  cmake_pop_check_state(RESET)
 endforeach()
+
 # Unconditionally add library with required compile flags. Targets starting with dot are hidden by some generators.
 add_library(.sanitizers_debug_flags INTERFACE)
-target_compile_options(.sanitizers_debug_flags INTERFACE ${SANITIZER_DEBUG_FLAGS})
+target_compile_options(.sanitizers_debug_flags INTERFACE ${Sanitizers_DEBUG_FLAGS})
 # Create alias that caller will use
 add_library(Sanitizers::DebugFlags ALIAS .sanitizers_debug_flags)
 
@@ -301,10 +346,10 @@ add_library(Sanitizers::DebugFlags ALIAS .sanitizers_debug_flags)
 add_library(.sanitizers_asan INTERFACE)
 target_link_libraries(.sanitizers_asan
   INTERFACE
-    Sanitizers::Address
-    Sanitizers::Leak
-    Sanitizers::Undefined
-    Sanitizers::DebugFlags
+    $<LINK_ONLY:Sanitizers::Address>
+    $<LINK_ONLY:Sanitizers::Leak>
+    $<LINK_ONLY:Sanitizers::Undefined>
+    $<LINK_ONLY:Sanitizers::DebugFlags>
 )
 add_library(Sanitizers::ASAN ALIAS .sanitizers_asan)
 
