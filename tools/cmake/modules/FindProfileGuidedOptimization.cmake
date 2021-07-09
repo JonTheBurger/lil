@@ -39,7 +39,7 @@ set(PROFILE_GUIDED_OPTIMIZATION_DATA_DIR ${CMAKE_BINARY_DIR}/tmp/pgo CACHE PATH
 mark_as_advanced(PROFILE_GUIDED_OPTIMIZATION_DATA_DIR)
 
 # ============================================================================ #
-#
+# Profile Generation Flags
 # ============================================================================ #
 set(testFlags -fprofile-generate=${PROFILE_GUIDED_OPTIMIZATION_DATA_DIR})
 set(PROFILE_GUIDED_OPTIMIZATION_GENERATE_FLAGS "")
@@ -64,7 +64,7 @@ target_link_options(.profileguidedoptimization.generate
 add_library(ProfileGuidedOptimization::Generate ALIAS .profileguidedoptimization.generate)
 
 # ============================================================================ #
-#
+# Profile Use Flags
 # ============================================================================ #
 set(testFlags -fprofile-use=${PROFILE_GUIDED_OPTIMIZATION_DATA_DIR})
 set(PROFILE_GUIDED_OPTIMIZATION_USE_FLAGS "")
@@ -87,9 +87,3 @@ target_link_options(.profileguidedoptimization.generate
     $<$<C_COMPILER_ID:MSVC>:"LINKER:/LTCG LINKER:/USEPROFILE">
 )
 add_library(ProfileGuidedOptimization::Use ALIAS .profileguidedoptimization.use)
-
-# ============================================================================ #
-# Auto-Declare Global Project Options
-# ============================================================================ #
-option(${PROJECT_NAME}_ENABLE_PGO_GENERATE "Globally enables instrumenting code for profile guided optimization" OFF)
-option(${PROJECT_NAME}_ENABLE_PGO_USE "Globally enables using profile guided optimization instrumentation files" OFF)

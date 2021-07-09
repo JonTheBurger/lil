@@ -16,7 +16,7 @@ Example Usages:
 Functions
 ^^^^^^^^^
 #]=======================================================================]
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.13) # target_link_options
 include_guard(GLOBAL)
 include(CheckCCompilerFlag)
 
@@ -235,6 +235,7 @@ function(set_build_flags NAME)
   set(CMAKE_C_FLAGS_${uppercase}             "${cflags}" ${setFlagArguments})
   set(CMAKE_CXX_FLAGS_${uppercase}           "${cflags}" ${setFlagArguments})
   set(CMAKE_EXE_LINKER_FLAGS_${uppercase}    "${lflags}" ${setFlagArguments})
+  set(CMAKE_STATIC_LINKER_FLAGS_${uppercase} "${lflags}" ${setFlagArguments})
   set(CMAKE_SHARED_LINKER_FLAGS_${uppercase} "${lflags}" ${setFlagArguments})
   set(CMAKE_MODULE_LINKER_FLAGS_${uppercase} "${lflags}" ${setFlagArguments})
 
@@ -244,5 +245,87 @@ function(set_build_flags NAME)
     mark_as_advanced(CMAKE_EXE_LINKER_FLAGS_${uppercase})
     mark_as_advanced(CMAKE_SHARED_LINKER_FLAGS_${uppercase})
     mark_as_advanced(CMAKE_MODULE_LINKER_FLAGS_${uppercase})
+  endif()
+endfunction()
+
+#[=======================================================================[.rst:
+.. command:: target_build_type
+
+  Applies the :variable:`CMAKE_BUILD_TYPE` flags named by ``type`` to the provided ``target``.
+
+  Signatures::
+
+    target_build_type(<target> [PUBLIC|PRIVATE|INTERFACE] <type>)
+
+  The options are:
+
+  ``<target>``
+  Name of the target to apply the flags to.
+
+  ``[PUBLIC|PRIVATE|INTERFACE]``
+  Transitivity of the applied flags.
+
+  ``<type>``
+  Name of the Build Type/Configuration.
+
+
+  Example usage:
+
+.. code-block:: cmake
+
+  target_build_type(Profile)
+#]=======================================================================]
+function(target_build_type TARGET)
+  list(APPEND CMAKE_MESSAGE_INDENT "[FindBuildConfType::target_build_type] ")
+
+  if (ARGC LESS 2)
+    message(FATAL_ERROR "target_built_type(<target> [PUBLIC|PRIVATE|INTERFACE] <type>) missing required arguments")
+    return()
+  endif()
+
+  if (ARGC GREATER 3)
+    message(FATAL_ERROR "target_built_type(<target> [PUBLIC|PRIVATE|INTERFACE] <type>) too many arguments; repeated <type> not supported")
+    return()
+  endif()
+
+  set(arg_TARGET ${ARGV0})
+  set(arg_TRANSITIVITY PRIVATE)
+  set(arg_TYPE ${ARGV1})
+
+  if (ARGC GREATER 2)
+    set(arg_TRANSITIVITY ${ARGV1})
+    set(arg_TYPE ${ARGV2})
+  endif()
+  string(TOUPPER ${arg_TYPE} arg_TYPE)
+
+  target_compile_options(${arg_TARGET}
+    ${arg_TRANSITIVITY}
+      $<$<COMPILE_LANGUAGE:C>:${CMAKE_C_FLAGS_${arg_TYPE}}>
+      $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CXX_FLAGS_${arg_TYPE}}>
+      $<$<COMPILE_LANGUAGE:ASM>:${CMAKE_ASM_FLAGS_${arg_TYPE}}>
+  )
+
+  get_target_property(targetType ${arg_TARGET} TYPE)
+
+  if (TYPE STREQUAL STATIC_LIBRARY)
+    target_link_options(${arg_TARGET}
+      ${arg_TRANSITIVITY}
+        ${CMAKE_STATIC_FLAGS_${arg_TYPE}}
+    )
+  elseif (TYPE STREQUAL MODULE_LIBRARY)
+    target_link_options(${arg_TARGET}
+      ${arg_TRANSITIVITY}
+        ${CMAKE_MODULE_FLAGS_${arg_TYPE}}
+    )
+  elseif (TYPE STREQUAL SHARED_LIBRARY)
+    target_link_options(${arg_TARGET}
+      ${arg_TRANSITIVITY}
+        ${CMAKE_SHARED_FLAGS_${arg_TYPE}}
+    )
+  elseif (TYPE STREQUAL EXECUTABLE)
+    target_link_options(${arg_TARGET}
+      ${arg_TRANSITIVITY}
+        ${CMAKE_EXE_FLAGS_${arg_TYPE}}
+    )
   endif()
 endfunction()

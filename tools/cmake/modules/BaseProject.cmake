@@ -20,23 +20,19 @@ else()
 endif()
 set(isProjectMaintainer ON)
 
-option(${PROJECT_NAME}_BUILD_DOCS
-  "Build tests for ${PROJECT_NAME}"
-  ${isProjectMaintainer}
-)
-option(${PROJECT_NAME}_BUILD_TESTS
-  "Build tests for ${PROJECT_NAME}"
-  ${isProjectMaintainer}
-)
+option(${PROJECT_NAME}_BUILD_DOCS "Build tests for ${PROJECT_NAME}" ${isProjectMaintainer})
+option(${PROJECT_NAME}_BUILD_TESTS "Build tests for ${PROJECT_NAME}" ${isProjectMaintainer})
 set(${PROJECT_NAME}_TEST_REGEX_FILTER
   ".*"
   CACHE PATH
   "Only test names that match this regular expression will be added (use _^ for none)"
 )
-option(CCACHE_ENABLE
-  "Use compiler caching to speed up later compilation"
-  ${isProjectMaintainer}
-)
+option(${PROJECT_NAME}_ENABLE_ASAN "Globally enables Address, Leak, and Undefined Behavior sanitizers" OFF)
+option(${PROJECT_NAME}_ENABLE_TSAN "Globally enables Thread and Undefined Behavior sanitizers" OFF)
+option(${PROJECT_NAME}_ENABLE_MSAN "Globally enables Memory and Undefined Behavior sanitizers" OFF)
+option(${PROJECT_NAME}_ENABLE_PGO_GENERATE "Globally enables instrumenting code for profile guided optimization" OFF)
+option(${PROJECT_NAME}_ENABLE_PGO_USE "Globally enables using profile guided optimization instrumentation files" OFF)
+option(CCACHE_ENABLE "Use compiler caching to speed up later compilation" ${isProjectMaintainer})
 
 #==============================================================================#
 # Standardize default options
@@ -118,15 +114,13 @@ if (isProjectMaintainer)
 
   find_package(Sanitizers)
   if (${PROJECT_NAME}_ENABLE_ASAN)
-#    list(APPEND LINK_LIRARIES Sanitizers::ASAN)
-#    link_libraries($<LINK_ONLY:Sanitizers::ASAN>)
-#    link_libraries($<BUILD_INTERFACE:Sanitizers::ASAN>)
+    add_asan_options()
   endif()
   if (${PROJECT_NAME}_ENABLE_TSAN)
-    link_libraries(Sanitizers::TSAN)
+    add_tsan_options()
   endif()
   if (${PROJECT_NAME}_ENABLE_MSAN)
-    link_libraries(Sanitizers::MSAN)
+    add_msan_options()
   endif()
 
   find_package(ProfileGuidedOptimization)
